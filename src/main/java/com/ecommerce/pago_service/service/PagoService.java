@@ -55,7 +55,7 @@ public class PagoService {
 
         log.info("Pago creado con id {}", guardado.getId());
 
-        // 🔥 6. Simular pago exitoso
+        //**** SIMULAR PAGO EXITOSO
         guardado.setEstado("PAGADO");
         pagoRepository.save(guardado);
 
