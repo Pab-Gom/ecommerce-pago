@@ -1,74 +1,54 @@
 package com.ecommerce.pago_service.exception;
-
-import java.time.LocalDateTime;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import java.time.LocalDateTime;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
 
-    //****PAGO NO ENCONTRADO
+public class GlobalExceptionHandler{
     @ExceptionHandler(PagoNoEncontradoException.class)
     public ResponseEntity<ErrorResponse> handlePagoNoEncontrado(PagoNoEncontradoException ex) {
-
-        ErrorResponse error = new ErrorResponse(
-                ex.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                LocalDateTime.now()
-        );
-
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    //****ORDEN NO ENCONTRADA
     @ExceptionHandler(IdOrdenNoEncontradaException.class)
-    public ResponseEntity<ErrorResponse> handleOrdenNoEncontrad(IdOrdenNoEncontradaException ex){
-        ErrorResponse error = new ErrorResponse(
-                ex.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handleOrdenNoEncontrada(IdOrdenNoEncontradaException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    //****USUARIO NO ENCONTRADO
     @ExceptionHandler(IdUsuarioNoEncontradoException.class)
-    public ResponseEntity<ErrorResponse> handleUsuarioNoEncontrado(IdUsuarioNoEncontradoException ex){
-        ErrorResponse error = new ErrorResponse(
-                ex.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handleUsuarioNoEncontrado(IdUsuarioNoEncontradoException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    //****ERRORES GENERALES
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleRuntime(RuntimeException ex){
-        ErrorResponse error = new ErrorResponse(
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorResponse> handleRuntime(RuntimeException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    //****VALIDACIONES
-    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
-            org.springframework.web.bind.MethodArgumentNotValidException ex){
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        String mensaje = ex.getBindingResult().getFieldError().getDefaultMessage();
+        return buildResponse(HttpStatus.BAD_REQUEST, mensaje);
+    }
 
-        String mensaje = ex.getBindingResult()
-                .getFieldError()
-                .getDefaultMessage();
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Token inválido o expirado");
+    }
 
-        ErrorResponse error = new ErrorResponse(
-                mensaje,
-                HttpStatus.BAD_REQUEST.value(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "No tienes permisos para acceder a este recurso");
+    }
+    
+    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String mensaje) {
+        ErrorResponse error = new ErrorResponse(mensaje, status.value(), LocalDateTime.now());
+        return new ResponseEntity<>(error, status);
     }
 }

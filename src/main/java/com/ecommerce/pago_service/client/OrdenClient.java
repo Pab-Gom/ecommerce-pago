@@ -1,29 +1,29 @@
 package com.ecommerce.pago_service.client;
-
+import com.ecommerce.pago_service.dto.OrdenResponseDto;
+import com.ecommerce.pago_service.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.ecommerce.pago_service.dto.OrdenResponseDto;
-
 @Component
-public class OrdenClient {
 
-    private final WebClient.Builder webClientBuilder;
+public class OrdenClient{
 
-    @Value("${orden-service.url}")
-    private String ordenServiceUrl;
-
-    public OrdenClient(WebClient.Builder webClientBuilder) {
-        this.webClientBuilder = webClientBuilder;
+    private final WebClient webClient;
+    private final JwtUtil jwtUtil;
+    public OrdenClient(WebClient.Builder webClientBuilder,
+                       JwtUtil jwtUtil,
+                       @Value("${orden-service.url}") String ordenServiceUrl) {
+        this.jwtUtil = jwtUtil;
+        this.webClient = webClientBuilder.baseUrl(ordenServiceUrl).build();
     }
 
-    //****OBTENER ORDEN POR ID
     public OrdenResponseDto obtenerOrdenPorId(Long id) {
         try {
-            return webClientBuilder.build()
-                    .get()
-                    .uri(ordenServiceUrl + "/{id}", id)
+            String token = jwtUtil.generateInternalToken("pago-service@internal");
+            return webClient.get()
+                    .uri("/{id}", id)
+                    .header("Authorization", "Bearer " + token)
                     .retrieve()
                     .bodyToMono(OrdenResponseDto.class)
                     .block();
@@ -32,17 +32,16 @@ public class OrdenClient {
         }
     }
 
-    //****ACTUALIZAR ESTADO DE ORDEN
     public void actualizarEstadoOrden(Long id, String estado) {
         try {
-            webClientBuilder.build()
-                    .patch()
-                    .uri(ordenServiceUrl + "/" + id + "/estado?estado=" + estado)
+            String token = jwtUtil.generateInternalToken("pago-service@internal");
+            webClient.patch()
+                    .uri("/" + id + "/estado?estado=" + estado)
+                    .header("Authorization", "Bearer " + token)
                     .retrieve()
                     .toBodilessEntity()
                     .block();
         } catch (Exception e) {
-            // puedes logear si quieres
         }
     }
 }
