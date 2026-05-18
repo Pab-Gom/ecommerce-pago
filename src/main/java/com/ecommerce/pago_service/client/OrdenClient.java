@@ -18,6 +18,7 @@ public class OrdenClient{
         this.webClient = webClientBuilder.baseUrl(ordenServiceUrl).build();
     }
 
+    // **** OBTIENE EL ID DEL MICROSERVICIO ORDEN
     public OrdenResponseDto obtenerOrdenPorId(Long id) {
         try {
             String token = jwtUtil.generateInternalToken("pago-service@internal");
@@ -32,6 +33,7 @@ public class OrdenClient{
         }
     }
 
+    // **** DEVUELVE LA ACTUALIZACION DEL ESTADO A ORDEN, DE PENDIENTE A PAGADO
     public void actualizarEstadoOrden(Long id, String estado) {
         try {
             String token = jwtUtil.generateInternalToken("pago-service@internal");

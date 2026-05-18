@@ -25,20 +25,26 @@ public class PagoService{
     @Autowired
     private OrdenClient ordenClient;
 
+    // **** METODO QUE TOMA EL ID DEL USUARIO LOGGEADO
     private Long getUsuarioIdFromToken() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return (Long) auth.getCredentials();
     }
 
+    // **** METODO PARA AUTORIZAR SI EL USUARIO INGRESADO TIENE ROL DE ADMIN
     private boolean esAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 
-    public PagoResponseDto crearPago(PagoRequestDto dto) {
+    // **** METODO PARA VERIFICACION DE ORDEN, CREACION Y MAPEO DE PAGO
+    public PagoResponseDto crearPago(PagoRequestDto dto){
+
         log.info("Creando pago para orden {}", dto.getOrdenId());
+
         OrdenResponseDto orden = ordenClient.obtenerOrdenPorId(dto.getOrdenId());
+
         if (orden == null) {
             log.warn("Orden no encontrada {}", dto.getOrdenId());
             throw new RuntimeException("La orden no existe");
@@ -63,6 +69,7 @@ public class PagoService{
 
         log.info("Pago creado con id {}", guardado.getId());
 
+        // **** ACTUALIZACION DE ESTADO A PAGADO EN MICROSERVICIO ORDEN
         guardado.setEstado("PAGADO");
 
         pagoRepository.save(guardado);
@@ -71,6 +78,7 @@ public class PagoService{
         return mapToDTO(guardado);
     }
 
+    // **** METODO PARA OBTENER TODOS LOS PAGOS (ADMIN)
     public List<Pago> obtenerTodos() {
         if (esAdmin()) {
             return pagoRepository.findAll();
@@ -79,11 +87,13 @@ public class PagoService{
         return pagoRepository.findByUsuarioId(usuarioId);
     }
 
+    // **** METODO PARA OBTENER PAGOS DEL USUARIO LOGGEADO POR ID
     public List<Pago> obtenerMisPagos() {
         Long usuarioId = getUsuarioIdFromToken();
         return pagoRepository.findByUsuarioId(usuarioId);
     }
 
+    // **** METODO PARA OBTENER PAGO POR ID
     public Pago obtenerPorId(Long id) {
         Pago pago = pagoRepository.findById(id)
                 .orElseThrow(() -> new PagoNoEncontradoException("No existe pago con esta id: " + id));
@@ -96,6 +106,7 @@ public class PagoService{
         return pago;
     }
 
+    // **** METODO PARA OBTENER ORDEN POR ID
     public List<Pago> obtenerPorOrden(Long ordenId) {
         if (esAdmin()) {
             return pagoRepository.findByOrdenId(ordenId);
@@ -106,6 +117,7 @@ public class PagoService{
                 .toList();
     }
 
+    // **** METODO PARA OBTENER PAGO POR ID DE USUARIO
     public List<Pago> obtenerPorUsuario(Long usuarioId) {
         if (!esAdmin()) {
             Long miId = getUsuarioIdFromToken();
@@ -116,6 +128,7 @@ public class PagoService{
         return pagoRepository.findByUsuarioId(usuarioId);
     }
 
+    // **** METODO PARA OBTENER PAGO POR ESTADO
     public List<Pago> obtenerPorEstado(String estado) {
         if (esAdmin()) {
             return pagoRepository.findByEstado(estado);
@@ -126,6 +139,7 @@ public class PagoService{
                 .toList();
     }
 
+    // **** METODO PARA ACTUALIZAR PAGO
     public Pago actualizarPago(Long id, Pago nuevoPago) {
         Pago pago = obtenerPorId(id);
         pago.setMetodoPago(nuevoPago.getMetodoPago());
@@ -133,6 +147,7 @@ public class PagoService{
         return pagoRepository.save(pago);
     }
 
+    // **** METODO PARA OBTENER ESTADO DE PAGO
     public Pago actualizarEstado(Long id, String estado) {
         Pago pago = obtenerPorId(id);
         if (!estado.equals("PENDIENTE") &&
@@ -144,11 +159,13 @@ public class PagoService{
         return pagoRepository.save(pago);
     }
 
+    // **** METODO PARA ELIMINAR PAGO POR ID
     public void eliminarPorId(Long id) {
         Pago pago = obtenerPorId(id);
         pagoRepository.delete(pago);
     }
     
+    // **** MAPEO DE PAGO A DTO PARA RESPONSE
     private PagoResponseDto mapToDTO(Pago pago) {
         PagoResponseDto dto = new PagoResponseDto();
         dto.setId(pago.getId());

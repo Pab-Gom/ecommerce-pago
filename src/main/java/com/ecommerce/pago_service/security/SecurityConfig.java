@@ -21,6 +21,7 @@ public class SecurityConfig{
 
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
 
+        // **** FUNCIONAMIENTO DE RUTAS DE ENDPOINTS SEGUN EL ROL DE CADA USUARIO
         return http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session ->
