@@ -1,6 +1,6 @@
 package com.ecommerce.pago_service.assembler;
 
-import com.ecommerce.pago_service.controller.PagoController;
+import com.ecommerce.pago_service.controller.PagoControllerV2;
 import com.ecommerce.pago_service.dto.PagoResponseDto;
 import com.ecommerce.pago_service.model.Pago;
 import org.springframework.hateoas.CollectionModel;
@@ -18,19 +18,19 @@ public class PagoModelAssembler implements RepresentationModelAssembler<Pago, En
         PagoResponseDto dto = mapToDTO(pago);
 
         return EntityModel.of(dto,
-            linkTo(methodOn(PagoController.class).obtenerPorId(pago.getId())).withSelfRel(),
-            linkTo(methodOn(PagoController.class).obtenerTodos()).withRel("pagos"),
-            linkTo(methodOn(PagoController.class).obtenerMisPagos()).withRel("mis-pagos"),
-            linkTo(methodOn(PagoController.class).obtenerPorEstado(pago.getEstado())).withRel("estado"),
-            linkTo(methodOn(PagoController.class).obtenerPorOrden(pago.getOrdenId())).withRel("orden"),
-            linkTo(methodOn(PagoController.class).obtenerPorUsuario(pago.getUsuarioId())).withRel("usuario")
+            linkTo(methodOn(PagoControllerV2.class).obtenerPorId(pago.getId())).withSelfRel(),
+            linkTo(methodOn(PagoControllerV2.class).obtenerTodos()).withRel("pagos"),
+            linkTo(methodOn(PagoControllerV2.class).obtenerMisPagos()).withRel("mis-pagos"),
+            linkTo(methodOn(PagoControllerV2.class).obtenerPorEstado(pago.getEstado())).withRel("estado"),
+            linkTo(methodOn(PagoControllerV2.class).obtenerPorOrden(pago.getOrdenId())).withRel("orden"),
+            linkTo(methodOn(PagoControllerV2.class).obtenerPorUsuario(pago.getUsuarioId())).withRel("usuario")
         );
     }
 
     @Override
     public CollectionModel<EntityModel<PagoResponseDto>> toCollectionModel(Iterable<? extends Pago> entities) {
         CollectionModel<EntityModel<PagoResponseDto>> models = RepresentationModelAssembler.super.toCollectionModel(entities);
-        models.add(linkTo(methodOn(PagoController.class).obtenerTodos()).withSelfRel());
+        models.add(linkTo(methodOn(PagoControllerV2.class).obtenerTodos()).withSelfRel());
         return models;
     }
 
