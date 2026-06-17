@@ -27,6 +27,7 @@ public class SecurityConfig{
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/swagger-ui/**","/v3/api-docs/**","/doc/swagger-ui.html").permitAll() //http://localhost:8085/swagger-ui/index.html//
                 .requestMatchers(HttpMethod.POST, "/pagos").hasAnyRole("USUARIO", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/pagos/mis-pagos").hasRole("USUARIO")
                 .requestMatchers(HttpMethod.GET, "/pagos").hasRole("ADMIN")
