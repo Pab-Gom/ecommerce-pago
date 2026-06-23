@@ -70,10 +70,9 @@ public class PagoService{
         log.info("Pago creado con id {}", guardado.getId());
 
         // **** ACTUALIZACION DE ESTADO A PAGADO EN MICROSERVICIO ORDEN
-        guardado.setEstado("PAGADO");
-
-        pagoRepository.save(guardado);
         ordenClient.actualizarEstadoOrden(guardado.getOrdenId(), "PAGADO");
+        guardado.setEstado("PAGADO");
+        pagoRepository.save(guardado);
 
         return mapToDTO(guardado);
     }

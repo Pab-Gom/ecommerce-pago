@@ -44,6 +44,7 @@ public class OrdenClient{
                     .toBodilessEntity()
                     .block();
         } catch (Exception e) {
+            throw new RuntimeException("Error al actualizar estado de la orden " + id, e);
         }
     }
 }

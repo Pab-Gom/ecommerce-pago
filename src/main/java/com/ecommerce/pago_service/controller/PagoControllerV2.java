@@ -35,8 +35,7 @@ public class PagoControllerV2 {
     @PostMapping
     @Operation(summary = "Crear un nuevo pago (V2)")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Pago creado exitosamente",
-                     content = @Content(schema = @Schema(implementation = PagoResponseDto.class))),
+        @ApiResponse(responseCode = "200", description = "Pago creado exitosamente"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos o la orden no existe/ya fue pagada"),
         @ApiResponse(responseCode = "401", description = "No autenticado")
     })
