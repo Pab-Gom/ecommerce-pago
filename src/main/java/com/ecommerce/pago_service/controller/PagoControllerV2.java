@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v2/pagos")
+@RequestMapping("/v2/pagos")
 @Tag(name = "Pagos V2", description = "API de gestión de pagos con HATEOAS")
 public class PagoControllerV2 {
 
